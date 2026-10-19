@@ -273,6 +273,17 @@ elif info["task"] == "synthesis":
         expect_error(post_json("/v1/audio/speech", {"input": "あ。", "voice": voice, "speed": 1.5}), 400, "unsupported_parameter", "speed",
                      "speed on Drama 3")
         expect_error(post_json("/v1/audio/speech", {"input": "あ。", "voice": voice, "top_p": 2}), 400, "unsupported_value", "top_p", "top_p 2")
+    elif info["architecture"] == "pocket-tts":
+        status, headers, body = post_json("/v1/audio/speech", {"input": TEXT, "voice": voice, "max_seconds": 0.5})
+        assert status == 200 and headers["x-speech-stop"] == "max_seconds" and len(wav_data(body)) <= rate, headers
+        print("max_seconds 0.5: X-Speech-Stop max_seconds")
+        expect_error(post_json("/v1/audio/speech", {"input": "あ。", "voice": voice, "speed": 1.5}), 400, "unsupported_parameter", "speed",
+                     "speed on Pocket TTS")
+        still = {"input": "あ。", "voice": voice, "temperature": 0}
+        assert wav_data(post_json("/v1/audio/speech", still | {"seed": 1})[2]) == wav_data(post_json("/v1/audio/speech", still | {"seed": 2})[2])
+        print("temperature 0: the same audio for the seeds 1 and 2")
+        expect_error(post_json("/v1/audio/speech", {"input": "あ。", "voice": voice, "temperature": -1}), 400, "unsupported_value",
+                     "temperature", "temperature -1")
     else:
         expect_error(post_json("/v1/audio/speech", {"input": "あ。", "voice": voice, "speed": 5}), 400, "unsupported_value", "speed",
                      "speed 5")
@@ -313,13 +324,15 @@ elif info["task"] == "synthesis":
     expect_error(post_json("/v1/audio/speech", {"input": "", "voice": voice}), 400, "invalid_value", "input", "an empty input")
     expect_error(post_json("/v1/audio/speech", {"input": "あ。", "voice": voice, "timestamps": True}), 400, "unsupported_parameter",
                  "timestamps", "timestamps")
-    # A model that speaks a sentence at a time refuses a run with no place to cut that is too long for a request.
+    # A model that speaks a sentence at a time refuses a run with no place to cut that is too long for a request; Pocket
+    # TTS cuts a text of any length into chunks itself, and none is too long.
     too_long = "あいうえおかきくけこ" * 80 if by_sentence else TEXT * 2000
     for format in ("wav", "pcm"):
         expect_error(post_json("/v1/audio/speech", {"input": "あ。", "response_format": format}), 400, "invalid_value", "voice",
                      f"no voice, {format}")
-        expect_error(post_json("/v1/audio/speech", {"input": too_long, "voice": voice, "response_format": format}), 400,
-                     "unsupported_value", "input", f"an input too long, {format}")
+        if info["architecture"] != "pocket-tts":
+            expect_error(post_json("/v1/audio/speech", {"input": too_long, "voice": voice, "response_format": format}), 400,
+                         "unsupported_value", "input", f"an input too long, {format}")
 else:
     expect_error(post_json("/v1/audio/speech", {"input": "あ。", "voice": "x"}), 404, None, None, "POST /v1/audio/speech to a recognition model")
 
