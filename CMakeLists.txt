@@ -154,6 +154,14 @@ add_library(drama3 STATIC
 target_include_directories(drama3 PUBLIC src/families)
 target_link_libraries(drama3 PUBLIC speechcommon)
 
+# Pocket TTS speech synthesis (Kyutai): the family.
+add_library(pockettts STATIC
+    src/families/pocket-tts/layout.cpp
+    src/families/pocket-tts/mimi.cpp
+)
+target_include_directories(pockettts PUBLIC src/families)
+target_link_libraries(pockettts PUBLIC speechcommon)
+
 # The C API, include/speech.h, twice: static for the executables, so that each stays one file, and shared as
 # libspeech for bindings and other programs. On Windows the two would both write speech.lib, the static one as
 # the library and the shared one as its import library, hence speech-static.
@@ -407,6 +415,11 @@ target_link_libraries(irodori-tts-timing PRIVATE irodoritts)
 add_executable(silero-vad-check checks/silero-vad/silero-vad-check.cpp tools/common/json-reader.cpp)
 target_include_directories(silero-vad-check PRIVATE checks tools/common)
 target_link_libraries(silero-vad-check PRIVATE silerovad)
+
+# Pocket TTS's Mimi against the dumps of reference/pocket-tts/dump.py.
+add_executable(pocket-tts-mimi-check checks/pocket-tts/pocket-tts-mimi-check.cpp)
+target_include_directories(pocket-tts-mimi-check PRIVATE checks)
+target_link_libraries(pocket-tts-mimi-check PRIVATE pockettts)
 
 # Drama 3's codec against the dumps of reference/drama3/dump.py.
 add_executable(drama3-codec-check checks/drama3/drama3-codec-check.cpp)
