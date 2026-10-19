@@ -158,6 +158,7 @@ target_link_libraries(drama3 PUBLIC speechcommon)
 add_library(pockettts STATIC
     src/families/pocket-tts/layout.cpp
     src/families/pocket-tts/mimi.cpp
+    src/families/pocket-tts/flow-lm.cpp
 )
 target_include_directories(pockettts PUBLIC src/families)
 target_link_libraries(pockettts PUBLIC speechcommon)
@@ -420,6 +421,11 @@ target_link_libraries(silero-vad-check PRIVATE silerovad)
 add_executable(pocket-tts-mimi-check checks/pocket-tts/pocket-tts-mimi-check.cpp)
 target_include_directories(pocket-tts-mimi-check PRIVATE checks)
 target_link_libraries(pocket-tts-mimi-check PRIVATE pockettts)
+
+# Pocket TTS's flow language model and flow head against the dumps of reference/pocket-tts/dump.py.
+add_executable(pocket-tts-lm-check checks/pocket-tts/pocket-tts-lm-check.cpp)
+target_include_directories(pocket-tts-lm-check PRIVATE checks)
+target_link_libraries(pocket-tts-lm-check PRIVATE pockettts)
 
 # Drama 3's codec against the dumps of reference/drama3/dump.py.
 add_executable(drama3-codec-check checks/drama3/drama3-codec-check.cpp)

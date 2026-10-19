@@ -318,8 +318,9 @@ def pocket_tts(model, devices, ctx):
                 if "https://huggingface.co/" + m["repository"] == model.repository and m["name"] == model.finetune.lower():
                     dumps.append(os.path.join(out, d))
     if not dumps:
-        return [missing("pocket-tts-mimi-check", model.label(), f"dump of {model.label()} under {out}")]
-    return [runs_on(device, "pocket-tts-mimi-check", model, [d], " " + os.path.basename(d)) for device in devices for d in dumps]
+        return [missing(f"pocket-tts-{stage}-check", model.label(), f"dump of {model.label()} under {out}") for stage in ("mimi", "lm")]
+    return [runs_on(device, f"pocket-tts-{stage}-check", model, [d], " " + os.path.basename(d))
+            for device in devices for stage in ("mimi", "lm") for d in dumps]
 
 
 def qwen3_asr(model, devices, ctx):
