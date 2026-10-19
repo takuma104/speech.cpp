@@ -47,7 +47,8 @@ The alternatives were turned down:
 ## Consequences
 
 Audio at another rate gives a text slightly different from the official implementation's, whose resampler is not this
-one, and an Irodori-TTS reference at another rate a latent that is not the runtime's, so `irodori-codec-check` checks
-such a reference's encoding from the dump's own input and not from the file; a Drama 3 voice made on the CPU holds the
-official codes. Two rates whose ratio in lowest terms has a term above 4096 are refused, which no two common rates of
+one, and an Irodori-TTS reference or a Pocket TTS recording at another rate a latent that is not the official one, so
+`irodori-codec-check` checks such a reference's encoding from the dump's own input and not from the file, and
+`pocket-tts-synthesis-check` compares the reading of a recording at another rate only by its length; a Drama 3 voice
+made on the CPU holds the official codes. Two rates whose ratio in lowest terms has a term above 4096 are refused, which no two common rates of
 recorded audio have.

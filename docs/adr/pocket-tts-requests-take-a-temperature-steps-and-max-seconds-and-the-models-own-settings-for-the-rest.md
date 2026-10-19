@@ -21,6 +21,8 @@ PyTorch reproduces.
   the file's 1.
 - **`max_seconds` bounds the speech of a whole request**, as Qwen3-TTS's and Drama 3's do: the official code bounds
   each chunk alone, and a long text speaks for as long as its chunks add up to.
+- **A chunk that reaches its longest before the end of speech ends there**, as the official code ends it, and the request
+  goes on to the next chunk and reports `model_limit` at its end, where the official code only logs a warning.
 - **`seed` seeds speech.cpp's own draw of the noise.** The same seed gives the same audio on the same device, and not
   the official audio, whose noise PyTorch draws.
 - **The rest stays the model's own**: `noise_clamp`, `eos_threshold`, `frames_after_eos` and `max_tokens` keep the

@@ -130,8 +130,9 @@ assert flow_net.time_embed[0].mlp[3].eps == flow_net.time_embed[1].mlp[3].eps
 w.add_float32(p + "flow.time_norm_eps", float(flow_net.time_embed[0].mlp[3].eps))
 
 # A request's defaults: the configuration's temperature, the variance of the noise a latent is drawn from, the LSD steps
-# and the threshold of the end-of-speech logit of default_parameters.py.
-w.add_float32(p + "sampler.temperature", float(config.default_temperature))
+# and the threshold of the end-of-speech logit of default_parameters.py. The keys of what the official code computes
+# with Python's floats are float64, so that int(0.02 * 24000) gives the official 480 frames and not 479.
+w.add_float64(p + "sampler.temperature", float(config.default_temperature))
 w.add_uint32(p + "sampler.default_steps", int(default_parameters.DEFAULT_SAMPLER_DECODE_STEPS))
 w.add_float32(p + "sampler.eos_threshold", float(default_parameters.DEFAULT_EOS_THRESHOLD))
 
@@ -142,8 +143,8 @@ require_source("tts_model", "frames_after_eos_guess += 2")
 require_source("text_chunking", "if number_of_words <= 4:\n        frames_after_eos_guess = 3")
 require_source("text_chunking", "    else:\n        frames_after_eos_guess = 1")
 w.add_uint32(p + "generation.min_frames_before_eos", int(TTSModel._MIN_FRAMES_BEFORE_EOS))
-w.add_float32(p + "generation.tokens_per_second", float(TTSModel._TOKENS_PER_SECOND_ESTIMATE))
-w.add_float32(p + "generation.padding_seconds", float(TTSModel._GEN_SECONDS_PADDING))
+w.add_float64(p + "generation.tokens_per_second", float(TTSModel._TOKENS_PER_SECOND_ESTIMATE))
+w.add_float64(p + "generation.padding_seconds", float(TTSModel._GEN_SECONDS_PADDING))
 w.add_uint32(p + "generation.short_text_words", 4)
 w.add_uint32(p + "generation.frames_after_eos_short", 3 + 2)
 w.add_uint32(p + "generation.frames_after_eos_long", 1 + 2)
@@ -156,11 +157,11 @@ w.add_uint32(p + "generation.fade_in_samples", int(config.mimi.sample_rate) // 2
 require_source("tts_model", "max_samples = int(30 * conditioning_sample_rate)")
 require_source("audio_utils", "frame = max(1, int(0.02 * sample_rate))")
 pause = inspect.signature(audio_utils.end_on_pause).parameters
-w.add_float32(p + "reference.max_seconds", 30.0)
-w.add_float32(p + "reference.frame_seconds", 0.02)
-w.add_float32(p + "reference.pause_seconds", float(pause["pause_sec"].default))
-w.add_float32(p + "reference.fade_seconds", float(pause["fade_sec"].default))
-w.add_float32(p + "reference.floor_db", float(pause["floor_db"].default))
+w.add_float64(p + "reference.max_seconds", 30.0)
+w.add_float64(p + "reference.frame_seconds", 0.02)
+w.add_float64(p + "reference.pause_seconds", float(pause["pause_sec"].default))
+w.add_float64(p + "reference.fade_seconds", float(pause["fade_sec"].default))
+w.add_float64(p + "reference.floor_db", float(pause["floor_db"].default))
 
 # The rules prepare_text_prompt() and split_into_best_sentences() apply to a text, from the configuration, and the
 # tokens a chunk of it holds at most, MAX_TOKEN_PER_CHUNK, which generate_audio() takes by default.

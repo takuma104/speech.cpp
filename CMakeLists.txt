@@ -162,6 +162,8 @@ add_library(pockettts STATIC
     src/families/pocket-tts/flow-lm.cpp
     src/families/pocket-tts/tokenizer.cpp
     src/families/pocket-tts/text.cpp
+    src/families/pocket-tts/voice.cpp
+    src/families/pocket-tts/synthesizer.cpp
 )
 target_include_directories(pockettts PUBLIC src/families)
 target_link_libraries(pockettts PUBLIC speechcommon)
@@ -170,17 +172,18 @@ target_link_libraries(pockettts PUBLIC speechcommon)
 # libspeech for bindings and other programs. On Windows the two would both write speech.lib, the static one as
 # the library and the shared one as its import library, hence speech-static.
 set(SPEECH_SOURCES src/api/speech.cpp src/api/info.cpp src/api/request.cpp src/api/detection.cpp src/api/voice.cpp
-    src/engines/qwen3-tts-engine.cpp src/engines/irodori-tts-engine.cpp src/engines/drama3-engine.cpp src/engines/fastconformer-engine.cpp
+    src/engines/qwen3-tts-engine.cpp src/engines/irodori-tts-engine.cpp src/engines/drama3-engine.cpp src/engines/pocket-tts-engine.cpp
+    src/engines/fastconformer-engine.cpp
     src/engines/qwen3-asr-engine.cpp src/engines/silero-vad-engine.cpp)
 
 add_library(speech-static STATIC ${SPEECH_SOURCES})
 target_include_directories(speech-static PUBLIC include PRIVATE src/engines)
-target_link_libraries(speech-static PUBLIC qwen3tts irodoritts drama3 fastconformer qwen3asr silerovad)
+target_link_libraries(speech-static PUBLIC qwen3tts irodoritts drama3 pockettts fastconformer qwen3asr silerovad)
 target_compile_definitions(speech-static PRIVATE SPEECH_VERSION="${PROJECT_VERSION}")
 
 add_library(speech SHARED ${SPEECH_SOURCES})
 target_include_directories(speech PUBLIC include PRIVATE src/engines)
-target_link_libraries(speech PRIVATE qwen3tts irodoritts drama3 fastconformer qwen3asr silerovad)
+target_link_libraries(speech PRIVATE qwen3tts irodoritts drama3 pockettts fastconformer qwen3asr silerovad)
 target_compile_definitions(speech PRIVATE SPEECH_BUILD_SHARED SPEECH_VERSION="${PROJECT_VERSION}" INTERFACE SPEECH_SHARED)
 set_target_properties(speech PROPERTIES C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
 # The shared library's SOVERSION is the C API's major version, which speech.h defines and nothing else repeats.
@@ -363,7 +366,8 @@ target_link_libraries(irodori-synthesis-check PRIVATE irodoritts)
 add_executable(quantize-check checks/common/quantize-check.cpp)
 target_link_libraries(quantize-check PRIVATE speechcommon)
 
-add_executable(speech-api-check checks/api/speech-api-check.c checks/api/speech-api-irodori.c checks/api/speech-api-drama3.c checks/api/speech-api-recognition.c
+add_executable(speech-api-check checks/api/speech-api-check.c checks/api/speech-api-irodori.c checks/api/speech-api-drama3.c checks/api/speech-api-pocket.c
+               checks/api/speech-api-recognition.c
                checks/api/speech-api-detection.c checks/api/speech-api-detection-stream.c checks/api/speech-api-common.c
                checks/api/speech-api-platform.c)
 target_link_libraries(speech-api-check PRIVATE speech)
@@ -434,6 +438,11 @@ target_link_libraries(pocket-tts-lm-check PRIVATE pockettts)
 add_executable(pocket-tts-text-check checks/pocket-tts/pocket-tts-text-check.cpp tools/common/json-reader.cpp)
 target_include_directories(pocket-tts-text-check PRIVATE checks tools/common)
 target_link_libraries(pocket-tts-text-check PRIVATE pockettts)
+
+# Pocket TTS's synthesis of a whole request against the dumps of reference/pocket-tts/dump.py.
+add_executable(pocket-tts-synthesis-check checks/pocket-tts/pocket-tts-synthesis-check.cpp tools/common/json-reader.cpp)
+target_include_directories(pocket-tts-synthesis-check PRIVATE checks tools/common)
+target_link_libraries(pocket-tts-synthesis-check PRIVATE pockettts)
 
 # Drama 3's codec against the dumps of reference/drama3/dump.py.
 add_executable(drama3-codec-check checks/drama3/drama3-codec-check.cpp)

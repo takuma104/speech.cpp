@@ -152,6 +152,18 @@ int check_irodori(speech_model * model, const speech_model_info * info, const ch
 int check_voice_params(const char * model_path, const char * reference, const char * made, const speech_load_params * params);
 
 /**
+ * Pocket TTS's rules of a request, spoken in `voice`: max_seconds without a bound of its own, a temperature of 0, the
+ * flow head's steps and a text of several chunks. Returns nonzero on a failure.
+ */
+int check_pocket(speech_model * model, const speech_model_info * info, const char * voice);
+
+/**
+ * Pocket TTS's voice files: one of `reference` made through the voice's parameters, and those of two references, of a
+ * loudness, of an embedding and of a recording past 30 s refused naming their input. Returns nonzero on a failure.
+ */
+int check_pocket_voices(const char * model_path, const char * reference, const char * made, const speech_load_params * params);
+
+/**
  * Drama 3's voice files: `made` of `reference` and its `transcript`, "<made>.cast.gguf" put together of it as speakers 0
  * and 1, and the voices that cannot be made refused naming their input. Returns nonzero on a failure.
  */

@@ -18,10 +18,13 @@
  *
  * With --make-drama3-voice, Drama 3's voice files of a recording and its transcript, of them put together as two
  * speakers, and the ones refused (speech-api-drama3.c), then refuses the recording added alone and speaks both voices.
+ * With --make-pocket-voice, Pocket TTS's voice file of a recording and the ones refused, and Pocket TTS's rules of a
+ * request (speech-api-pocket.c).
  *
  * usage: speech-api-check <model.gguf> <out.wav> [--device NAME] [--voice NAME=FILE]...
  *                         [--make-voice <reference.wav> <voice.gguf>]
  *                         [--make-drama3-voice <reference.wav> <transcript> <voice.gguf>]
+ *                         [--make-pocket-voice <reference.wav> <voice.gguf>]
  *        speech-api-check transcribe <model.gguf> <dump folder>... [--device NAME]
  *        speech-api-check detect <model.gguf> <dump folder>... [--device NAME]
  */
@@ -109,6 +112,7 @@ static int check_voices(speech_model * model, const char * model_path, char ** n
     if (speech_model_get_info(model, &info) != SPEECH_OK) return fail("speech_model_get_info");
     const size_t own = speech_model_info_voice_count(info);
     const int voice_files = speech_model_info_voice_files(info), recordings = speech_model_info_voice_recordings(info);
+    const int pocket = !strcmp(speech_model_info_architecture(info), "pocket-tts");
     speech_model_info_free(info);
     for (size_t i = 0; i < n_voices; i++) {
         const double start = now_seconds();
@@ -128,8 +132,8 @@ static int check_voices(speech_model * model, const char * model_path, char ** n
     ok &= expect(speech_voice_add(model, "", path), SPEECH_ERROR_INVALID_ARGUMENT, "name", "a voice without a name");
     ok &= expect(speech_voice_add(model, "missing", "no-such-folder/voice.gguf"), SPEECH_ERROR_IO, "path", "a voice file that is not there");
     // The voice none speaks without a reference in a file that holds the null speaker, and its name stays its own in
-    // one that does not.
-    ok &= expect(speech_voice_add(model, "none", path), SPEECH_ERROR_INVALID_ARGUMENT, "name", "a voice added under the name none");
+    // one that does not; Pocket TTS has no such voice, and none is a name like any other.
+    if (!pocket) ok &= expect(speech_voice_add(model, "none", path), SPEECH_ERROR_INVALID_ARGUMENT, "name", "a voice added under the name none");
     if (recording && !recordings) {
         ok &= expect(speech_voice_add(model, "recording", recording), SPEECH_ERROR_INVALID_ARGUMENT, "path",
                      "a recording added to a model that takes voice files alone");
@@ -441,9 +445,11 @@ static int check_model(speech_model * model, const char * model_path, const char
     if (speech_model_get_info(model, &info) != SPEECH_OK) return fail("speech_model_get_info");
     const int irodori = !strcmp(speech_model_info_architecture(info), "irodori-tts");
     const int drama3 = !strcmp(speech_model_info_architecture(info), "drama3");
+    // Irodori-TTS and Pocket TTS speak in voices made from recordings, which a WAVE file gives too.
+    const int pocket = !strcmp(speech_model_info_architecture(info), "pocket-tts"), recordings = irodori || pocket;
     if (speech_model_info_task(info) != SPEECH_TASK_SYNTHESIS || speech_model_info_max_text_tokens(info) == 0 ||
-        (irodori && (!speech_model_info_voice_codec(info) || n_voices == 0)) || (!irodori && speech_model_info_voice_count(info) == 0) ||
-        speech_model_info_voice_recordings(info) != irodori) {
+        (recordings && (!speech_model_info_voice_codec(info) || n_voices == 0)) || (!recordings && speech_model_info_voice_count(info) == 0) ||
+        speech_model_info_voice_recordings(info) != recordings) {
         fprintf(stderr, "FAIL: a synthesis model is not described as speech.h declares, or Irodori-TTS was given no voice\n");
         return 1;
     }
@@ -451,8 +457,9 @@ static int check_model(speech_model * model, const char * model_path, const char
     speech_model_info_free(info);
     if (speech_model_get_info(model, &info) != SPEECH_OK) return fail("speech_model_get_info");
     const int rate = speech_model_info_sample_rate(info);
-    // Irodori-TTS speaks in the first voice added, since its own voice none has no reference.
-    const char * voice = made ? "made" : irodori ? names[0] : speech_model_info_voice_name(info, 0);
+    // Irodori-TTS speaks in the first voice added, since its own voice none has no reference, and Pocket TTS, which has
+    // no voice of its own.
+    const char * voice = made ? "made" : recordings ? names[0] : speech_model_info_voice_name(info, 0);
 
     size_t tokens = 0;
     if (speech_model_info_text_tokens(info, SENTENCE, &tokens) != SPEECH_OK) return fail("speech_model_info_text_tokens");
@@ -517,6 +524,7 @@ static int check_model(speech_model * model, const char * model_path, const char
 
     if (check_defaults(model, info, voice) != 0) return 1;
     if (irodori ? check_irodori(model, info, voice) != 0
+        : pocket ? check_pocket(model, info, voice) != 0
         : drama3 ? check_length_limits(model, info, voice) != 0 || check_drama3_sampling(model, voice) != 0 || check_drama3_experts(model, info, voice) != 0 ||
                        check_drama3_cast(model, info, made)
                  : check_length_limits(model, info, voice) != 0 || check_qwen3_tts_sampling(model, voice) != 0 ||
@@ -537,6 +545,7 @@ int main(int argc, char ** argv) {
         fprintf(stderr,
                 "usage: %s <model.gguf> <out.wav> [--device NAME] [--voice NAME=FILE]... "
                 "[--make-voice <reference.wav> <voice.gguf>] [--make-drama3-voice <reference.wav> <transcript> <voice.gguf>]\n"
+                "       [--make-pocket-voice <reference.wav> <voice.gguf>]\n"
                 "       %s transcribe <model.gguf> <dump folder>... [--device NAME]\n"
                 "       %s detect <model.gguf> <dump folder>... [--device NAME]\n",
                 argv[0], argv[0], argv[0]);
@@ -554,6 +563,7 @@ int main(int argc, char ** argv) {
     char * names[MAX_VOICES], * paths[MAX_VOICES];
     size_t n_voices = 0;
     const char * reference = NULL, * made = NULL, * transcript = NULL;
+    int pocket_voice = 0;
     for (int i = 3; i < argc; i++) {
         if (!strcmp(argv[i], "--device") && i + 1 < argc) {
             if (speech_load_params_set_device(params, argv[++i]) != SPEECH_OK) return fail("speech_load_params_set_device");
@@ -569,6 +579,10 @@ int main(int argc, char ** argv) {
         } else if (!strcmp(argv[i], "--make-voice") && i + 2 < argc) {
             reference = argv[++i];
             made = argv[++i];
+        } else if (!strcmp(argv[i], "--make-pocket-voice") && i + 2 < argc) {
+            reference = argv[++i];
+            made = argv[++i];
+            pocket_voice = 1;
         } else if (!strcmp(argv[i], "--make-drama3-voice") && i + 3 < argc) {
             reference = argv[++i];
             transcript = argv[++i];
@@ -586,6 +600,13 @@ int main(int argc, char ** argv) {
         paths[n_voices++] = (char *) made;
         names[n_voices] = (char *) "cast";
         paths[n_voices++] = cast;
+    } else if (made && pocket_voice) {
+        const double start = now_seconds();
+        if (speech_voice_make(model_path, reference, made, params) != SPEECH_OK) return fail("speech_voice_make");
+        printf("made the voice file %s in %.3f s\n", made, now_seconds() - start);
+        if (check_pocket_voices(model_path, reference, made, params) != 0) return 1;
+        names[n_voices] = (char *) "made";
+        paths[n_voices++] = (char *) made;
     } else if (made) {
         const double start = now_seconds();
         if (speech_voice_make(model_path, reference, made, params) != SPEECH_OK) return fail("speech_voice_make");

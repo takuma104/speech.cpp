@@ -150,7 +150,9 @@ int check_quantize_refusals(const char * model_path) {
     if (detection) {
         ok &= expect(speech_quantize(model_path, "q8_0", out), SPEECH_ERROR_INVALID_ARGUMENT, "type", "quantizing a model whose layout keeps F32");
     } else if (f32) {
-        ok &= expect(speech_quantize(model_path, "q4_k", out), SPEECH_ERROR_IO, "out_path", "quantizing F32 weights into a folder that is not there");
+        // Q8_0, which the layout of every model with weights to quantize writes: a K-quant file of a model whose layout
+        // keeps much of it in F16, as Pocket TTS's does, would hold most of its bytes in F16, and is refused.
+        ok &= expect(speech_quantize(model_path, "q8_0", out), SPEECH_ERROR_IO, "out_path", "quantizing F32 weights into a folder that is not there");
     } else {
         ok &= expect(speech_quantize(model_path, "q4_k", out), SPEECH_ERROR_INVALID_ARGUMENT, "model_path",
                      "quantizing weights that are not F32");

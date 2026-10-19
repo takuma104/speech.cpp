@@ -325,8 +325,14 @@ def pocket_tts(model, devices, ctx):
     dumps = [d for d in dumps if os.path.isfile(os.path.join(d, "voice_prompt.npy"))]
     if not dumps:
         return runs + [missing(f"pocket-tts-{stage}-check", model.label(), f"dump of {model.label()} under {out}") for stage in ("mimi", "lm")]
-    return runs + [runs_on(device, f"pocket-tts-{stage}-check", model, [d], " " + os.path.basename(d))
-                   for device in devices for stage in ("mimi", "lm") for d in dumps]
+    for device in devices:
+        runs += [runs_on(device, f"pocket-tts-{stage}-check", model, [d], " " + os.path.basename(d)) for stage in ("mimi", "lm") for d in dumps]
+        for d in dumps:
+            # The synthesis check reads the dump's reference recording too, where --references holds it.
+            with open(os.path.join(d, "meta.json"), encoding="utf-8") as f:
+                wav = os.path.join(ctx.references, json.load(f)["reference"]["file"]) if ctx.references else None
+            runs.append(runs_on(device, "pocket-tts-synthesis-check", model, [d] + ([wav] if wav and os.path.isfile(wav) else []), " " + os.path.basename(d)))
+    return runs
 
 
 def qwen3_asr(model, devices, ctx):

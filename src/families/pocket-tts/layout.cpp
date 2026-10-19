@@ -43,6 +43,13 @@ float bounded(const ModelFile & m, const std::string & key, float least) {
     return v;
 }
 
+/** The same of a float64 key, a Python float of the official code. */
+double bounded64(const ModelFile & m, const std::string & key, double least) {
+    const double v = m.f64(key);
+    require(std::isfinite(v) && v >= least, m, key + " is not a finite number of at least " + std::to_string(least));
+    return v;
+}
+
 /** A transformer's layers of width `dim` and feed-forward width `ffn`, with layer scales where `scaled`. */
 void add_transformer(std::vector<TensorSpec> & t, const std::string & prefix, int layers, int64_t dim, int64_t ffn, const Storage & matrix,
                      bool scaled) {
@@ -106,16 +113,16 @@ std::vector<TensorSpec> tensors(const ModelFile & m) {
     bounded(m, p + "flow.norm_eps", 0);
     bounded(m, p + "flow.time_norm_eps", 0);
 
-    bounded(m, p + "sampler.temperature", 0);
+    bounded64(m, p + "sampler.temperature", 0);
     m.size(p + "sampler.default_steps");
     require(std::isfinite(m.f32(p + "sampler.eos_threshold")), m, p + "sampler.eos_threshold is not finite");
     m.u32(p + "generation.min_frames_before_eos");
-    require(bounded(m, p + "generation.tokens_per_second", 0) > 0, m, p + "generation.tokens_per_second is 0");
-    bounded(m, p + "generation.padding_seconds", 0);
+    require(bounded64(m, p + "generation.tokens_per_second", 0) > 0, m, p + "generation.tokens_per_second is 0");
+    bounded64(m, p + "generation.padding_seconds", 0);
     for (const char * key : {"short_text_words", "frames_after_eos_short", "frames_after_eos_long", "fade_in_samples"}) m.u32(p + "generation." + key);
-    require(bounded(m, p + "reference.max_seconds", 0) > 0, m, p + "reference.max_seconds is 0");
-    require(bounded(m, p + "reference.frame_seconds", 0) > 0, m, p + "reference.frame_seconds is 0");
-    for (const char * key : {"pause_seconds", "fade_seconds", "floor_db"}) bounded(m, p + "reference." + key, 0);
+    require(bounded64(m, p + "reference.max_seconds", 0) > 0, m, p + "reference.max_seconds is 0");
+    require(bounded64(m, p + "reference.frame_seconds", 0) > 0, m, p + "reference.frame_seconds is 0");
+    for (const char * key : {"pause_seconds", "fade_seconds", "floor_db"}) bounded64(m, p + "reference." + key, 0);
     read_text(m);
     read_tokenizer(m);
 

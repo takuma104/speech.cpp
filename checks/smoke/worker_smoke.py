@@ -10,7 +10,9 @@ objects or have no id or type, the other task's messages); chunks to a synthesis
 refused by a model that takes voice files alone; for
 Irodori-TTS a fixed length, the progress of a long sampler, a paragraph past what one request speaks spoken in one
 synthesize, whose reported seed repeats it, and a run with no place to cut refused, naming it, for Drama 3 max_seconds,
-the sampling options' ranges and a paragraph of several of its chunks spoken in one synthesize, and for Qwen3-TTS a
+the sampling options' ranges and a paragraph of several of its chunks spoken in one synthesize, for Pocket TTS
+max_seconds, a temperature of 0 that draws nothing and a paragraph of several of its chunks spoken in one synthesize,
+with no text too long, and for Qwen3-TTS a
 text past its tokens refused, max_seconds and the sampling options, and an instruction where the model takes one and its
 refusal where it does not; and that a request option given to the worker as a flag is the default of a request that
 does not set it, while one the model does not take or out of its range ends the worker with fatal. Writes the first
@@ -44,6 +46,7 @@ voice = added[0][0] if added else info["voices"][0]["name"]
 own = [v["name"] for v in info["voices"]][: len(info["voices"]) - len(added)]
 irodori = info["architecture"] == "irodori-tts"
 drama3 = info["architecture"] == "drama3"
+pocket = info["architecture"] == "pocket-tts"
 print(f"ready in {time.perf_counter() - w.started:.2f} s: {info['name']} on {info['device']}, protocol {ready['protocol']}, speech.cpp {ready['version']}, "
       f"{len(info['voices'])} voices, model information equal to speech info --json")
 
@@ -159,6 +162,13 @@ if speaks_by_sentence(info):
     message = w.terminal("e9", "error", "out_of_range", "text")["error"]["message"]
     assert message.startswith('"' + run_text[:20]), message
     print(f"e9: a run of {len(run_text)} characters with no place to cut, refused: {message[:100]}")
+elif pocket:
+    # The model cuts a text of any length into chunks itself, so a paragraph is one synthesize and no text is too long.
+    t0 = time.perf_counter()
+    pcm_p, end_p = speak("paragraph", text="".join(PARAGRAPH))
+    assert end_p["stop"] == "complete" and info["max_text_tokens"] == 2**53 - 1, short(end_p)
+    print(f"paragraph: {len(PARAGRAPH)} sentences in one synthesize, {len(pcm_p) // 2 / rate:.2f} s of audio in "
+          f"{time.perf_counter() - t0:.2f} s")
 else:
     too_long, tokens = TEXT, count["tokens"]
     while tokens <= info["max_text_tokens"]:
@@ -227,6 +237,17 @@ elif drama3:
     pcm, end = speak("pa", text=paragraph, seed=5)
     assert end["stop"] == "complete" and end["samples"] > 12 * rate, short(end)
     print(f"pa: a paragraph of {len(paragraph.encode())} bytes gave {end['samples'] / rate:.1f} s in one synthesize ({end['stop']})")
+elif pocket:
+    expect_error({"type": "synthesize", "id": "e12", "text": "あ。", "voice": voice, "speed": 1.5}, "unsupported", "speed")
+    expect_error({"type": "synthesize", "id": "e13", "text": "あ。", "voice": voice, "seconds": 2}, "unsupported", "seconds")
+    expect_error({"type": "synthesize", "id": "e14", "text": "あ。", "voice": voice, "steps": 0}, "out_of_range", "steps")
+    expect_error({"type": "synthesize", "id": "e15", "text": "あ。", "voice": voice, "temperature": -1}, "out_of_range", "temperature")
+    pcm, end = speak("s", text=LONG, max_seconds=0.5)
+    assert end["stop"] == "max_seconds" and end["samples"] <= 0.5 * rate, short(end)
+    print(f"s: max_seconds 0.5 stopped it at {end['samples'] / rate:.3f} s ({end['stop']})")
+    # A temperature of 0 draws no noise, so the seed changes nothing.
+    assert speak("t1", text="あ。", seed=1, temperature=0)[0] == speak("t2", text="あ。", seed=2, temperature=0)[0], "temperature 0 changed with the seed"
+    print("t1, t2: a temperature of 0 gave the same audio for the seeds 1 and 2")
 else:
     expect_error({"type": "synthesize", "id": "e12", "text": "あ。", "voice": voice, "speed": 1.5}, "unsupported", "speed")
     expect_error({"type": "synthesize", "id": "e13", "text": "あ。", "voice": voice, "seconds": 2}, "unsupported", "seconds")

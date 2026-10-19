@@ -256,7 +256,10 @@ typedef enum speech_option {
      * Added in 3.1.
      */
     SPEECH_OPT_TOP_P = 13,
-    /** "temperature", a number above 0: what the logits are divided by before a draw. Added in 3.1. */
+    /**
+     * "temperature", a number: what the logits are divided by before a draw, above 0; or, for a model that draws its
+     * speech from Gaussian noise (Pocket TTS), the variance of that noise, from 0, which draws none. Added in 3.1.
+     */
     SPEECH_OPT_TEMPERATURE = 14,
     /**
      * "repetition_penalty", a number above 0: what the logit of a token that the speech has already taken is divided

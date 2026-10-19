@@ -270,6 +270,10 @@ FamilyInfo describe_drama3(const std::shared_ptr<const ModelFile> & file);
 std::unique_ptr<Engine> load_drama3(const std::string & path, ggml_backend_t backend, int threads);
 void make_drama3_voice(const std::string & model_path, const VoiceRecipe & recipe, const std::string & voice_path, ggml_backend_t backend);
 
+FamilyInfo describe_pocket_tts(const std::shared_ptr<const ModelFile> & file);
+std::unique_ptr<Engine> load_pocket_tts(const std::string & path, ggml_backend_t backend, int threads);
+void make_pocket_tts_voice(const std::string & model_path, const VoiceRecipe & recipe, const std::string & voice_path, ggml_backend_t backend);
+
 FamilyInfo describe_fastconformer(const std::shared_ptr<const ModelFile> & file);
 std::unique_ptr<Engine> load_fastconformer(const std::string & path, ggml_backend_t backend, int threads);
 

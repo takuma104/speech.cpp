@@ -362,8 +362,9 @@ MOST_CER = 0.02
 
 def speaks_by_sentence(info):
     """Whether a synthesis model speaks a text a sentence at a time, as speech tts and speech serve speak it: one whose
-    request speaks less than 60 s, by the upper bound of its option seconds or max_seconds."""
-    longest = [o["maximum"] for o in info["options"] if o["name"] in ("seconds", "max_seconds")]
+    request speaks less than 60 s, by the upper bound of its option seconds or max_seconds, which an option without one,
+    such as Pocket TTS's max_seconds, leaves out of its information."""
+    longest = [o.get("maximum", float("inf")) for o in info["options"] if o["name"] in ("seconds", "max_seconds")]
     return bool(longest) and min(longest) < 60
 
 
