@@ -199,6 +199,7 @@ if isinstance(tokenizer, JsonTokenizer):
         assert tokens[added["id"]] == added["content"] and not added["normalized"] and added["special"]
         assert not (added["lstrip"] or added["rstrip"] or added["single_word"])
     special_ids = [int(added["id"]) for added in spec["added_tokens"]]
+    control_ids = []
     runtime = "tokenizers"
 else:
     assert isinstance(tokenizer, SentencePieceTokenizer)
@@ -215,6 +216,7 @@ else:
     tokens = [piece.piece for piece in proto.pieces]
     scores = [float(piece.score) for piece in proto.pieces]
     unknown_id = [i for i, piece in enumerate(proto.pieces) if piece.type == kinds.UNKNOWN][0]
+    control_ids = [i for i, piece in enumerate(proto.pieces) if piece.type == kinds.CONTROL]
     special_ids = []
     runtime = "sentencepiece"
 assert len(tokens) == n_bins and all(f"<0x{b:02X}>" in tokens for b in range(256))
@@ -222,9 +224,13 @@ w.add_string(p + "tokenizer.runtime", runtime)
 add_array(p + "tokenizer.tokens", tokens, GGUFValueType.STRING)
 add_array(p + "tokenizer.scores", scores, GGUFValueType.FLOAT64)
 w.add_uint32(p + "tokenizer.unknown_id", unknown_id)
-# The added tokens tokenizers splits out of a text before anything else; sentencepiece has none, and its file no key.
+# The added tokens tokenizers splits out of a text before anything else and skips in decoding, and the control pieces
+# sentencepiece matches in no text and decodes to nothing; a file has each key only where its tokenizer has such pieces,
+# since GGUF has no empty array.
 if special_ids:
     add_array(p + "tokenizer.special_ids", special_ids, GGUFValueType.INT32)
+if control_ids:
+    add_array(p + "tokenizer.control_ids", control_ids, GGUFValueType.INT32)
 
 # Mimi: SEANet's strides from the waveform's side (the decoder's order, reversed by the encoder), the residual units of
 # each block, of dilations dilation_base ** j, the downsampling to the frame rate, and the transformers before and after

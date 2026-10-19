@@ -317,10 +317,16 @@ def pocket_tts(model, devices, ctx):
                 # Each configuration of a repository is a model of its own, which its file names as its finetune.
                 if "https://huggingface.co/" + m["repository"] == model.repository and m["name"] == model.finetune.lower():
                     dumps.append(os.path.join(out, d))
+    # The text cases are in the folder whose meta.json names the model and that holds text-cases.jsonl.
+    cases = [os.path.join(d, "text-cases.jsonl") for d in dumps if os.path.isfile(os.path.join(d, "text-cases.jsonl"))]
+    runs = [Run("pocket-tts-text-check", [model.path, c], None, f"{model.label()} {os.path.basename(os.path.dirname(c))}") for c in cases]
+    if not cases:
+        runs.append(missing("pocket-tts-text-check", model.label(), f"text-cases.jsonl of {model.label()} under {out}"))
+    dumps = [d for d in dumps if os.path.isfile(os.path.join(d, "voice_prompt.npy"))]
     if not dumps:
-        return [missing(f"pocket-tts-{stage}-check", model.label(), f"dump of {model.label()} under {out}") for stage in ("mimi", "lm")]
-    return [runs_on(device, f"pocket-tts-{stage}-check", model, [d], " " + os.path.basename(d))
-            for device in devices for stage in ("mimi", "lm") for d in dumps]
+        return runs + [missing(f"pocket-tts-{stage}-check", model.label(), f"dump of {model.label()} under {out}") for stage in ("mimi", "lm")]
+    return runs + [runs_on(device, f"pocket-tts-{stage}-check", model, [d], " " + os.path.basename(d))
+                   for device in devices for stage in ("mimi", "lm") for d in dumps]
 
 
 def qwen3_asr(model, devices, ctx):

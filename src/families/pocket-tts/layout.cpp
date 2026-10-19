@@ -53,7 +53,10 @@ void add_transformer(std::vector<TensorSpec> & t, const std::string & prefix, in
     if (scaled) add_numbered(t, prefix + ".blk.", layers, {{"attn_scale", {dim}, kF32}, {"ffn_scale", {dim}, kF32}});
 }
 
-/** The tokenizer's keys: its runtime, pieces, scores, unknown piece and the added tokens tokenizers matches in a text. */
+/**
+ * The tokenizer's keys: its runtime, pieces, scores and unknown piece, the added tokens tokenizers matches in a text and
+ * the control pieces of sentencepiece.
+ */
 void read_tokenizer(const ModelFile & m) {
     const std::string p = "pocket-tts.tokenizer.";
     const std::string runtime = m.one_of(p + "runtime", {"tokenizers", "sentencepiece"});
@@ -65,9 +68,11 @@ void read_tokenizer(const ModelFile & m) {
         std::snprintf(name, sizeof name, "<0x%02X>", b);
         require(std::count(tokens.begin(), tokens.end(), name) == 1, m, "the tokenizer has no single piece " + std::string(name) + " for its byte fallback");
     }
-    require(m.has(p + "special_ids") == (runtime == "tokenizers"), m, "only a tokenizer that tokenizers runs has " + p + "special_ids");
-    if (m.has(p + "special_ids")) {
-        for (int32_t id : m.i32_array(p + "special_ids")) require(id >= 0 && (size_t) id < tokens.size(), m, p + "special_ids holds an id past the pieces");
+    require(!m.has(p + "special_ids") || runtime == "tokenizers", m, "only a tokenizer that tokenizers runs has " + p + "special_ids");
+    require(!m.has(p + "control_ids") || runtime == "sentencepiece", m, "only a tokenizer that sentencepiece runs has " + p + "control_ids");
+    for (const char * key : {"special_ids", "control_ids"}) {
+        if (!m.has(p + key)) continue;
+        for (int32_t id : m.i32_array(p + key)) require(id >= 0 && (size_t) id < tokens.size(), m, p + key + " holds an id past the pieces");
     }
 }
 

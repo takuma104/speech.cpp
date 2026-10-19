@@ -160,6 +160,8 @@ add_library(pockettts STATIC
     src/families/pocket-tts/layout.cpp
     src/families/pocket-tts/mimi.cpp
     src/families/pocket-tts/flow-lm.cpp
+    src/families/pocket-tts/tokenizer.cpp
+    src/families/pocket-tts/text.cpp
 )
 target_include_directories(pockettts PUBLIC src/families)
 target_link_libraries(pockettts PUBLIC speechcommon)
@@ -427,6 +429,11 @@ target_link_libraries(pocket-tts-mimi-check PRIVATE pockettts)
 add_executable(pocket-tts-lm-check checks/pocket-tts/pocket-tts-lm-check.cpp)
 target_include_directories(pocket-tts-lm-check PRIVATE checks)
 target_link_libraries(pocket-tts-lm-check PRIVATE pockettts)
+
+# Pocket TTS's tokenizer and the cutting of a text into chunks against the cases of reference/pocket-tts/text_cases.py.
+add_executable(pocket-tts-text-check checks/pocket-tts/pocket-tts-text-check.cpp tools/common/json-reader.cpp)
+target_include_directories(pocket-tts-text-check PRIVATE checks tools/common)
+target_link_libraries(pocket-tts-text-check PRIVATE pockettts)
 
 # Drama 3's codec against the dumps of reference/drama3/dump.py.
 add_executable(drama3-codec-check checks/drama3/drama3-codec-check.cpp)
