@@ -1,0 +1,33 @@
+[project]
+name = "speech-cpp-pocket-tts-reference"
+version = "0"
+description = "Runs the official Pocket TTS to dump reference tensors and speak sentences, and converts its weights to GGUF"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "pocket-tts @ git+https://github.com/kyutai-labs/pocket-tts@9aa7a7f0e52a4cd81bcf8a0fc7c981cdc6d11e53",
+  "torch==2.14.0",
+  "numpy",
+  "safetensors",
+  "soundfile",
+  "huggingface_hub",
+  "gguf",
+  "protobuf>=7.36.2",
+]
+
+[tool.uv]
+package = false
+constraint-dependencies = [
+  # The versions pocket-tts's own uv.lock pins at the commit above for Python 3.12, so that the official code runs on
+  # the packages it was released with.
+  "einops==0.8.2",
+  "huggingface-hub==1.32.0",
+  "numpy==2.5.3",
+  "pydantic==2.13.5",
+  "pydantic-core==2.46.5",
+  "pyyaml==6.0.3",
+  "safetensors==0.8.0",
+  "scipy==1.18.1",
+  "sentencepiece==0.2.2",
+  "tokenizers==0.23.2",
+  "typing-extensions==4.16.0",
+]
