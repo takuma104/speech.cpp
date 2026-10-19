@@ -1,11 +1,13 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "model-file.h"
+#include "unigram.h"
 
 namespace irodori {
 
@@ -24,7 +26,6 @@ public:
     std::vector<int32_t> encode(const std::string & text) const;
 
 private:
-    void encode_unigram(const std::string & piece, std::vector<int32_t> & ids) const;
     void encode_bpe(const std::string & piece, std::vector<int32_t> & ids) const;
 
     /** What a merge of two pieces gives: the merge's rank among the merges and the merged piece. */
@@ -35,13 +36,11 @@ private:
 
     bool bpe_ = false;
     std::vector<std::string> tokens_;
-    std::vector<double> scores_;
+    std::optional<Unigram> unigram_;
     std::unordered_map<uint64_t, Merge> merges_;
     std::unordered_map<std::string, int32_t> ids_;
     /** The added tokens by their first byte. */
     std::vector<int32_t> added_[256];
-    size_t longest_ = 0;
-    double unknown_score_ = 0;
     int32_t bos_ = 0, unknown_ = 0;
     int32_t bytes_[256];
 };

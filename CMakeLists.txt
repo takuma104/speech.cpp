@@ -50,6 +50,7 @@ add_library(speechcommon STATIC
     src/common/log.cpp
     src/common/qwen3-decoder.cpp
     src/common/qwen2-tokenizer.cpp
+    src/common/unigram.cpp
     src/common/added-vocabulary.cpp
     src/common/utf8.cpp
     src/common/unicode.cpp
