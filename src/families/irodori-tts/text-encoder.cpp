@@ -7,12 +7,6 @@
 
 namespace irodori {
 
-namespace {
-
-constexpr double kPi = 3.14159265358979323846;
-
-}  // namespace
-
 /*
  * Activations are channel-first ([channels, tokens]), so a linear layer is one matrix product. Both backbones rotate
  * the two halves of each head (GGML_ROPE_TYPE_NEOX), with another base in their global layers.
@@ -134,13 +128,6 @@ ggml_tensor * TextEncoder::t5gemma2(Graph & g, const std::vector<int32_t> & ids,
         x = ggml_add(ctx, kept, ggml_mul(ctx, ggml_repeat(ctx, ggml_reshape_2d(ctx, m_.tensor("text.embd_eoi"), hidden_, 1), x), is_eoi));
     }
     if (layers) layers->push_back(x);
-    // gelu_pytorch_tanh, from operations every backend computes in float32: the CPU's ggml_gelu() reads a table of
-    // half-precision values.
-    auto gelu_tanh = [&](ggml_tensor * a) {
-        ggml_tensor * cube = ggml_mul(ctx, ggml_mul(ctx, a, a), a);
-        ggml_tensor * inner = ggml_scale(ctx, ggml_add(ctx, a, ggml_scale(ctx, cube, 0.044715f)), (float) std::sqrt(2.0 / kPi));
-        return ggml_mul(ctx, a, ggml_scale_bias(ctx, ggml_tanh(ctx, inner), 0.5f, 0.5f));
-    };
     for (int l = 0; l < layers_; l++) {
         const std::string b = "text.blk." + std::to_string(l) + ".";
         const bool global = global_.at(l) != 0;
@@ -163,7 +150,7 @@ ggml_tensor * TextEncoder::t5gemma2(Graph & g, const std::vector<int32_t> & ids,
         x = ggml_add(ctx, x, rms_norm(mul_mat(ctx, m_.tensor(b + "attn_out"), o), b + "attn_post_norm"));
 
         h = rms_norm(x, b + "ffn_norm");
-        h = ggml_mul(ctx, gelu_tanh(mul_mat(ctx, m_.tensor(b + "ffn_gate"), h)), mul_mat(ctx, m_.tensor(b + "ffn_up"), h));
+        h = ggml_mul(ctx, gelu_tanh(ctx, mul_mat(ctx, m_.tensor(b + "ffn_gate"), h)), mul_mat(ctx, m_.tensor(b + "ffn_up"), h));
         x = ggml_add(ctx, x, rms_norm(mul_mat(ctx, m_.tensor(b + "ffn_down"), h), b + "ffn_post_norm"));
         if (layers && l + 1 < layers_) layers->push_back(x);
     }

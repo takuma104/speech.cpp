@@ -1,5 +1,6 @@
 #include "graph.h"
 
+#include <cmath>
 #include <cstring>
 #include <functional>
 #include <stdexcept>
@@ -31,6 +32,13 @@ void computing(const std::string & device, const std::function<ggml_status()> & 
 }
 
 }  // namespace
+
+ggml_tensor * gelu_tanh(ggml_context * ctx, ggml_tensor * x) {
+    constexpr double kPi = 3.14159265358979323846;
+    ggml_tensor * cube = ggml_mul(ctx, ggml_mul(ctx, x, x), x);
+    ggml_tensor * inner = ggml_scale(ctx, ggml_add(ctx, x, ggml_scale(ctx, cube, 0.044715f)), (float) std::sqrt(2.0 / kPi));
+    return ggml_mul(ctx, x, ggml_scale_bias(ctx, ggml_tanh(ctx, inner), 0.5f, 0.5f));
+}
 
 void compute_graph(ggml_backend_t backend, ggml_cgraph * gf) {
     computing(ggml_backend_name(backend), [&] { return ggml_backend_graph_compute(backend, gf); });

@@ -26,6 +26,12 @@ inline ggml_tensor * mul_mat_id(ggml_context * ctx, ggml_tensor * experts, ggml_
 }
 
 /**
+ * GELU in its tanh approximation, torch's gelu(approximate="tanh"), from operations every backend computes in float32:
+ * the CPU's ggml_gelu() reads a table of half-precision values.
+ */
+ggml_tensor * gelu_tanh(ggml_context * ctx, ggml_tensor * x);
+
+/**
  * Computes `gf`, whose tensors have their memory, on `backend`. A backend that runs out of memory while it computes
  * throws an Error of Fault::OutOfMemory, and one that fails otherwise an Error of Fault::Device.
  */
