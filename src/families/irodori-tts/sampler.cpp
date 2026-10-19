@@ -252,20 +252,6 @@ std::vector<float> Sampler::sample(const Conditions & c, std::vector<float> x, i
     return x;
 }
 
-std::vector<float> gaussian_noise(uint64_t seed, size_t n) {
-    std::mt19937_64 rng(seed);
-    std::vector<float> out(n);
-    constexpr double kTwoPi = 6.283185307179586;
-    for (size_t i = 0; i < n; i += 2) {
-        // Uniform on (0, 1]: 53 random bits, offset so that the logarithm never sees zero.
-        const double u1 = ((rng() >> 11) + 1.0) * 0x1.0p-53, u2 = (rng() >> 11) * 0x1.0p-53;
-        const double r = std::sqrt(-2.0 * std::log(u1));
-        out[i] = (float) (r * std::cos(kTwoPi * u2));
-        if (i + 1 < n) out[i + 1] = (float) (r * std::sin(kTwoPi * u2));
-    }
-    return out;
-}
-
 std::vector<float> speaker_noise(const std::vector<float> & draw, const std::vector<float> & speaker) {
     // torch's std() of a float32 tensor accumulates in double precision.
     double sum = 0;

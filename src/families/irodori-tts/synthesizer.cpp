@@ -3,10 +3,12 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <random>
 #include <stdexcept>
 
 #include "error.h"
 #include "layout.h"
+#include "sampling.h"
 #include "text-normalizer.h"
 #include "wav.h"
 
@@ -194,7 +196,8 @@ size_t Synthesizer::synthesize(const Request & r, const Voice & voice, const Aud
         std::vector<float> noise = r.noise, speaker_draw = r.speaker_noise;
         if (noise.empty()) {
             // The runtime draws the speaker's noise after the latent's from the same generator.
-            noise = gaussian_noise(r.seed, n + m);
+            std::mt19937_64 rng(r.seed);
+            noise = gaussian(rng, n + m);
             speaker_draw.assign(noise.begin() + (std::ptrdiff_t) n, noise.end());
             noise.resize(n);
         }

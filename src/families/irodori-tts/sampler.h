@@ -120,9 +120,6 @@ private:
     Guidance guidance_;
 };
 
-/** Standard normal samples from a seed, the same on every platform (a Mersenne Twister and Box-Muller). */
-std::vector<float> gaussian_noise(uint64_t seed, size_t n);
-
 /**
  * The speaker condition that the branch without the speaker attends to in noise mode: `draw` times the standard
  * deviation of every value of `speaker`, with Bessel's correction and at least 1e-6, as the runtime scales its noise.
