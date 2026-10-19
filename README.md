@@ -72,7 +72,7 @@ implementation, from the same inputs.
 A command takes a model by its name and fetches its converted file from Hugging Face, from the repository the name links
 to, the first time. [docs/models.md](docs/models.md) lists the models with their sizes, voices and languages, and each
 family has a page: [Qwen3-TTS](docs/models/qwen3-tts.md), [Irodori-TTS](docs/models/irodori-tts.md), [Drama 3](docs/models/drama3.md),
-[FastConformer](docs/models/fastconformer.md), [Qwen3-ASR](docs/models/qwen3-asr.md) and
+[Pocket TTS](docs/models/pocket-tts.md), [FastConformer](docs/models/fastconformer.md), [Qwen3-ASR](docs/models/qwen3-asr.md) and
 [Silero VAD](docs/models/silero-vad.md).
 
 ## Install
@@ -128,7 +128,7 @@ source](docs/install.md#build-from-source).
 | `speech tts` | speaks text into a WAVE file or to stdout |
 | `speech asr` | writes the text of WAVE files, or of the microphone as someone speaks |
 | `speech vad` | writes where someone speaks in WAVE files |
-| `speech voice` | makes a voice file for Irodori-TTS or Drama 3 from reference recordings |
+| `speech voice` | makes a voice file for Irodori-TTS, Drama 3 or Pocket TTS from reference recordings |
 | `speech info` | prints what a model file says of its model |
 | `speech devices` | lists the devices a model can run on |
 | `speech models`, `pull`, `rm` | list, fetch and remove models |
@@ -226,7 +226,7 @@ Each model's page has more.
 | [Install](docs/install.md) | installers, updating, uninstalling, requirements, release archives and building from source |
 | [Command line](docs/cli.md) | every subcommand and option |
 | [Models](docs/models.md) | the catalog, names, where models are kept, voices and languages |
-| [Qwen3-TTS](docs/models/qwen3-tts.md), [Irodori-TTS](docs/models/irodori-tts.md), [Drama 3](docs/models/drama3.md), [FastConformer](docs/models/fastconformer.md), [Qwen3-ASR](docs/models/qwen3-asr.md), [Silero VAD](docs/models/silero-vad.md) | each family: what it does, its options, accuracy and speed |
+| [Qwen3-TTS](docs/models/qwen3-tts.md), [Irodori-TTS](docs/models/irodori-tts.md), [Drama 3](docs/models/drama3.md), [Pocket TTS](docs/models/pocket-tts.md), [FastConformer](docs/models/fastconformer.md), [Qwen3-ASR](docs/models/qwen3-asr.md), [Silero VAD](docs/models/silero-vad.md) | each family: what it does, its options, accuracy and speed |
 | [Server and page](docs/server.md) | `speech serve` and OpenAI's audio API |
 | [Worker protocol](docs/worker.md) | `speech worker` for programs |
 | [C API](docs/c-api.md) | `speech.h` |
@@ -246,6 +246,9 @@ MIT, see [LICENSE](LICENSE). The model weights are their authors':
 - Drama 3 and its codec are Fish Audio's, under the Fish Audio Community License 1.0: research and non-commercial use
   is free, commercial use is allowed below USD 500,000 of yearly revenue, and a speech or voice-cloning service for
   others needs a separate license from Fish Audio. Built with Fish Audio.
+- Pocket TTS is Kyutai's, under CC-BY-4.0, and its Japanese model takuma104's, under CC-BY-NC-4.0 for non-commercial use
+  alone. Kyutai's terms forbid voice cloning without the speaker's explicit consent and presenting generated speech as
+  a real recording.
 - The parakeet models are NVIDIA's, under CC-BY-4.0, and reazonspeech-nemo-v2 is reazon-research's, under the Apache
   License 2.0.
 - Silero VAD is the Silero Team's, under the MIT License.

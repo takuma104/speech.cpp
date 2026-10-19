@@ -7,7 +7,7 @@ This page lists the subcommands of `speech` and their options. `speech <subcomma
 | [`speech tts`](#speech-tts) | speaks text into a WAVE file or to stdout |
 | [`speech asr`](#speech-asr) | writes the text of WAVE files, or of the microphone as someone speaks |
 | [`speech vad`](#speech-vad) | writes where someone speaks in WAVE files |
-| [`speech voice`](#speech-voice) | makes a voice file for Irodori-TTS or Drama 3 from reference recordings |
+| [`speech voice`](#speech-voice) | makes a voice file for Irodori-TTS, Drama 3 or Pocket TTS from reference recordings |
 | [`speech info`](#speech-info) | prints what a model file says of its model, without loading it |
 | [`speech devices`](#speech-devices) | lists the devices a model can run on |
 | [`speech models`](#speech-models) | lists the models a name fetches, what is fetched, and which model to start with |
@@ -232,7 +232,8 @@ speech voice MODEL ((REFERENCE.wav | VOICE.gguf)... | EMBEDDING.speaker.safetens
   --threads N -v
 ```
 
-- Makes a voice file for a model that takes voice files (Irodori-TTS, Drama 3) from one or more recordings at any rate.
+- Makes a voice file for a model that takes voice files (Irodori-TTS, Drama 3, Pocket TTS) from one or more recordings at
+  any rate; Pocket TTS takes one recording of at most 30 s.
   Each is encoded on its own and the results are joined in order. Only the codec is read from MODEL.
 - Drama 3 needs the words each recording speaks, one `--transcript` per recording. A recording is speaker 0 unless
   `--speaker` gives another, and a Drama 3 voice file given as an input keeps its speakers unless `--speaker` gives one.

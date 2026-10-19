@@ -95,6 +95,8 @@ A synthesis request needs a `voice`.
 - **Drama 3** speaks with the voice `none`, with which the model chooses a voice for each speaker the text names, or
   in the voices of a voice file that `speech voice` made of recordings and their transcripts, each given to a speaker
   ([models/drama3.md](models/drama3.md#voices)). It takes a voice file alone, not a WAVE file.
+- **Pocket TTS** has no voice of its own and speaks in the voice of a recording that you add, from a WAVE file of at most
+  30 s or a voice file that `speech voice` made of one ([models/pocket-tts.md](models/pocket-tts.md#voices)).
 
 | Entry point | How to add a voice |
 |---|---|
@@ -103,14 +105,14 @@ A synthesis request needs a `voice`.
 | `speech serve` | `--add-voice NAME=FILE`, or a recording on the page (Irodori-TTS) |
 | C API | `speech_voice_add()` |
 
-A voice's name is case-sensitive, and may be neither a voice of the model nor `none`.
+A voice's name is case-sensitive, and may be neither a voice of the model nor, for Irodori-TTS and Drama 3, `none`.
 
 ## Languages
 
 - A model's languages are BCP 47 tags: two letters, or three for a language without a two-letter code (`yue`, `fil`).
 - A request's `language` is one of them, a region or script of one (`ja-JP`, `zh-Hant`), or `auto`, the default, which
   leaves the choice to the model. Any other language is refused.
-- Qwen3-TTS and Qwen3-ASR are steered by the language. Irodori-TTS, Drama 3 and the FastConformer models only check it
+- Qwen3-TTS and Qwen3-ASR are steered by the language. Irodori-TTS, Drama 3, Pocket TTS and the FastConformer models only check it
   against their languages and do not use it. Silero VAD has no languages and takes `auto` alone.
 - Qwen3-ASR's results say which language it heard.
 

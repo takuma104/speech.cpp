@@ -61,7 +61,7 @@ speech.cpp は、1つのコマンド `speech` と1つの共有ライブラリ `l
 | 認識 | [`parakeet-tdt-0.6b-v3`](https://huggingface.co/sakasegawa/parakeet-tdt-0.6b-v3-GGUF) | ヨーロッパの 25 言語 | 言語を自分で判定し、句読点、大文字、時刻つきで認識します |
 | 検出 | [`silero-vad`](https://huggingface.co/sakasegawa/silero-vad-GGUF) | どの言語でも | 人が話している区間を見つけ、認識モデルに発話を1つずつ渡します。1.2 MB です |
 
-コマンドはモデルを名前で受け取り、初めて使うときに、名前のリンク先の Hugging Face のリポジトリから変換済みのファイルを取得します。[docs/models.md](docs/models.md) には各モデルのサイズ、声、言語が載っています。ファミリーごとのページもあります。[Qwen3-TTS](docs/models/qwen3-tts.md)、[Irodori-TTS](docs/models/irodori-tts.md)、[Drama 3](docs/models/drama3.md)、[FastConformer](docs/models/fastconformer.md)、[Qwen3-ASR](docs/models/qwen3-asr.md)、[Silero VAD](docs/models/silero-vad.md)。
+コマンドはモデルを名前で受け取り、初めて使うときに、名前のリンク先の Hugging Face のリポジトリから変換済みのファイルを取得します。[docs/models.md](docs/models.md) には各モデルのサイズ、声、言語が載っています。ファミリーごとのページもあります。[Qwen3-TTS](docs/models/qwen3-tts.md)、[Irodori-TTS](docs/models/irodori-tts.md)、[Drama 3](docs/models/drama3.md)、[Pocket TTS](docs/models/pocket-tts.md)、[FastConformer](docs/models/fastconformer.md)、[Qwen3-ASR](docs/models/qwen3-asr.md)、[Silero VAD](docs/models/silero-vad.md)。
 
 ## インストール
 
@@ -112,7 +112,7 @@ irm https://raw.githubusercontent.com/nyosegawa/speech.cpp/main/install.ps1 | ie
 | `speech tts` | テキストを読み上げ、WAVE ファイルか標準出力に書き出します |
 | `speech asr` | WAVE ファイルの音声、または話している最中のマイクの音声を文字に起こします |
 | `speech vad` | WAVE ファイルの中で人が話している区間を書き出します |
-| `speech voice` | 参照録音から Irodori-TTS か Drama 3 の声のファイルを作ります |
+| `speech voice` | 参照録音から Irodori-TTS、Drama 3、Pocket TTS の声のファイルを作ります |
 | `speech info` | モデルファイルに書かれているモデルの情報を表示します |
 | `speech devices` | モデルを動かせるデバイスを一覧にします |
 | `speech models`, `pull`, `rm` | モデルの一覧表示、取得、削除をします |
@@ -199,7 +199,7 @@ speech_synthesize(request, on_audio, NULL);   /* on_audio receives the samples a
 | [Install](docs/install.md) | インストーラ、更新、アンインストール、必要なもの、リリースのアーカイブ、ソースからのビルド |
 | [Command line](docs/cli.md) | すべてのサブコマンドとオプション |
 | [Models](docs/models.md) | カタログ、モデルの名前、モデルを置く場所、声、言語 |
-| [Qwen3-TTS](docs/models/qwen3-tts.md), [Irodori-TTS](docs/models/irodori-tts.md), [Drama 3](docs/models/drama3.md), [FastConformer](docs/models/fastconformer.md), [Qwen3-ASR](docs/models/qwen3-asr.md), [Silero VAD](docs/models/silero-vad.md) | 各ファミリーができること、オプション、精度、速度 |
+| [Qwen3-TTS](docs/models/qwen3-tts.md), [Irodori-TTS](docs/models/irodori-tts.md), [Drama 3](docs/models/drama3.md), [Pocket TTS](docs/models/pocket-tts.md), [FastConformer](docs/models/fastconformer.md), [Qwen3-ASR](docs/models/qwen3-asr.md), [Silero VAD](docs/models/silero-vad.md) | 各ファミリーができること、オプション、精度、速度 |
 | [Server and page](docs/server.md) | `speech serve` と OpenAI の音声 API |
 | [Worker protocol](docs/worker.md) | プログラムから使う `speech worker` |
 | [C API](docs/c-api.md) | `speech.h` |
@@ -213,5 +213,6 @@ MIT ライセンスです。[LICENSE](LICENSE) を見てください。モデル
 - Irodori-TTS v4-Large は Aratako 氏のもので、テキストエンコーダーが Google の T5Gemma 2 から派生しているため、Gemma Terms of Use で提供されています。倫理上の制限は v4.1 と同じです。
 - Irodori-TTS のファイルに含まれるコーデック Semantic-DACVAE-Japanese-32dim は Aratako 氏のもので、MIT License で提供されています。これは Meta の facebook/dacvae-watermarked(Apache License 2.0)から派生しています。そのモデルカードの本文は SAM License にも触れていますが、facebookresearch/dacvae で 2025-12-19 に Apache-2.0 に訂正されました。
 - Drama 3 とそのコーデックは Fish Audio のもので、Fish Audio Community License 1.0 で提供されています。研究と非商用の利用は無料で、商用の利用は年間の売上が 50 万米ドル未満なら認められ、他人に音声合成や声のクローンを提供するサービスには Fish Audio との別の契約が要ります。Built with Fish Audio.
+- Pocket TTS は Kyutai のもので CC-BY-4.0 で提供され、その日本語モデルは takuma104 のもので CC-BY-NC-4.0 で非商用の利用に限って提供されています。Kyutai の規約は、話者の明示的な同意のない声のクローンと、合成した音声を本物の録音として示すことを禁じています。
 - parakeet のモデルは NVIDIA のもので CC-BY-4.0、reazonspeech-nemo-v2 は reazon-research のもので Apache License 2.0 で提供されています。
 - Silero VAD は Silero Team のもので、MIT License で提供されています。

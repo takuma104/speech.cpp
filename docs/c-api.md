@@ -270,7 +270,7 @@ Each model takes some of them, with ranges and defaults from its file, and `spee
 | `decoding` | string | none | reazonspeech-nemo-v2 |
 | `decode_on_cpu` | bool | none | FastConformer |
 | `experts_on_cpu` | bool | true | [Drama 3](models/drama3.md#devices-and-memory) |
-| `do_sample`, `top_k`, `top_p`, `temperature`, `repetition_penalty` | bool, int, float, float, float | none | Qwen3-TTS; `top_k`, `top_p` and `temperature` also Drama 3 |
+| `do_sample`, `top_k`, `top_p`, `temperature`, `repetition_penalty` | bool, int, float, float, float | none | Qwen3-TTS; `top_k`, `top_p` and `temperature` also Drama 3; `temperature` also Pocket TTS, the variance of the noise it draws from |
 | `code_predictor_do_sample`, `code_predictor_top_k`, `code_predictor_top_p`, `code_predictor_temperature` | bool, int, float, float | none | Qwen3-TTS |
 | `instructions` | string | `""` | Qwen3-TTS 1.7B, Irodori-TTS |
 | `cfg_scale_text`, `cfg_scale_speaker`, `cfg_guidance_mode`, `cfg_min_t`, `cfg_max_t`, `truncation_factor`, `rescale_k`, `rescale_sigma`, `speaker_uncond_mode`, `sway_coeff`, `speaker_kv_scale`, `speaker_kv_min_t`, `speaker_kv_max_layers`, `cfg_scale_instructions` | float, but `cfg_guidance_mode` and `speaker_uncond_mode` string and `speaker_kv_max_layers` int | none | Irodori-TTS v4.1-Small (RF) |
@@ -342,8 +342,8 @@ loaded on Metal, with two of its nine voices and four of its options shown:
   file or a recording says none, but for Drama 3, whose description names the voice's speakers (`speakers 0 and 1`). A
   recognition or detection model has no `voices`, `incremental` or `max_text_tokens`.
 - `voice_files` is true for a model that takes voices made from recordings; `voice_codec` then follows it, the hash a
-  voice file must carry. `voice_recordings` is true for a model that adds a voice from a WAVE file as well (Irodori-TTS),
-  and false for one that needs a voice file (Drama 3, whose voice files hold each recording's words).
+  voice file must carry. `voice_recordings` is true for a model that adds a voice from a WAVE file as well (Irodori-TTS,
+  Pocket TTS), and false for one that needs a voice file (Drama 3, whose voice files hold each recording's words).
 - An option has `type` (`string`, `int`, `float`, `bool`), `required`, `steers`, and where they apply `default`,
   `minimum` or `exclusive_minimum`, `maximum`, and `choices`.
 - `device` and `threads` are there for a loaded model alone. `threads` is the number of CPU threads in effect for a model
