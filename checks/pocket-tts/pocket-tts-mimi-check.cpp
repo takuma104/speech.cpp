@@ -71,7 +71,9 @@ int main(int argc, char ** argv) {
     // at a time; on Metal, whose matrix kernel rounds its inputs to half precision, 51.1, 66.8 and 61.5 dB. Metal
     // multiplies the 16 columns of one frame at the transformer's rate with its few-row kernels, whose sums run in
     // another order than its kernel for more columns, so a frame at a time departs from calls of 2 to 8 frames by the
-    // same 61.5 to 63.9 dB.
+    // same 61.5 to 63.9 dB. On Vulkan on an RTX 5090 on 2026-10-21, 51.0, 62.7 and 55.9 dB: a frame at a time departs
+    // from calls of 2 to 8 frames by 65.0 to 68.1 dB and from a whole chunk at once, which Vulkan multiplies with its
+    // kernel for many columns, by 55.9 to 57.8 dB.
     const bool cpu = ggml_backend_is_cpu(backend);
     const double encoder_db = cpu ? 95 : 45, decoder_db = cpu ? 95 : 60, windows_db = cpu ? 120 : 55;
     bool ok = true;

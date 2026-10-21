@@ -83,9 +83,10 @@ int main(int argc, char ** argv) {
     const Diff da = compare(audio, official);
     print_diff("samples", da);
     // Measured on an Apple M4 Max on 2026-10-20 with the ja-short and en-long dumps, every speech of the official
-    // frames: on the CPU 62.0 and 78.5 dB, on Metal 27.1 and 25.6 dB. Each step reads the latent of the step before, so
-    // the error of every step, 112.9 dB or more on the CPU and 62.4 dB or more on Metal from the official inputs
-    // (pocket-tts-lm-check), feeds into the next.
+    // frames: on the CPU 62.0 and 78.5 dB, on Metal 27.1 and 25.6 dB; on Vulkan on an RTX 5090 on 2026-10-21, 26.2 and
+    // 21.8 dB. Each step reads the latent of the step before, so the error of every step, 112.9 dB or more on the CPU,
+    // 62.4 dB or more on Metal and 58.2 dB or more on Vulkan from the official inputs (pocket-tts-lm-check), feeds into
+    // the next.
     ok = ok && audio.size() == official.size() && da.snr_db > (cpu ? 50 : 20);
     ok = ok && (ending == Ending::Complete || ending == Ending::ModelLimit);
     ggml_backend_free(backend);

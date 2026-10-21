@@ -55,14 +55,17 @@ int main(int argc, char ** argv) {
     // Measured on an Apple M4 Max on 2026-10-20 with the ja-short and en-long dumps, the lowest SNR: on the CPU 137.9 dB
     // for the voice prompt's rows, 112.9 dB for the model, 114.5 dB for the latents of its steps and 134.4 dB for the
     // flow head alone; on Metal, whose matrix kernel rounds its inputs to half precision, 138.1, 62.4, 71.8 and 135.1 dB,
-    // the flow head's products of one column keeping float32. The tokens' rows are the table's, bit for bit.
+    // the flow head's products of one column keeping float32. The tokens' rows are the table's, bit for bit. On Vulkan
+    // on an RTX 5090 on 2026-10-21, 73.6, 58.2, 75.2 and 135.3 dB: Vulkan multiplies the voice prompt's latent rounded
+    // to half precision, where Metal keeps float32, and rounding the latent alone on the CPU gives the same 73.6 and
+    // 74.0 dB for the two dumps.
     const bool cpu = ggml_backend_is_cpu(backend);
-    const double rows_db = 120, lm_db = cpu ? 100 : 55, flow_db = cpu ? 100 : 60, head_db = 120;
+    const double rows_db = 120, voice_db = cpu ? 120 : 60, lm_db = cpu ? 100 : 55, flow_db = cpu ? 100 : 60, head_db = 120;
     bool ok = true;
 
     const Npy latent = read_npy(dir + "/latent.npy"), prompt = read_npy(dir + "/voice_prompt.npy"), kv = read_npy(dir + "/voice_kv.npy");
     const int64_t frames = latent.shape[0], voice = prompt.shape[0], dim = lm.dim();
-    ok = check("voice prompt rows", lm.voice_rows(latent.f32, frames), prompt.f32, rows_db) && ok;
+    ok = check("voice prompt rows", lm.voice_rows(latent.f32, frames), prompt.f32, voice_db) && ok;
     lm.voice(latent.f32, frames);
     std::vector<float> keys, values, want_keys, want_values;
     for (int l = 0; l < (int) kv.shape[0]; l++) {
