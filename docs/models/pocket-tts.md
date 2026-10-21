@@ -72,14 +72,19 @@ The codec and the part that turns noise into each frame stay in F16 in every typ
 
 ## Speed
 
-On an Apple M4 Max with a voice of a recording, a Japanese text of 15 s and an English one of 10 s (2026-10-20):
+With a voice of a recording, a Japanese text of 15 s and an English one of 10 s, on an Apple M4 Max on 2026-10-20 and on
+Windows with an RTX 5090 and a Core Ultra 9 285 on 2026-10-21:
 
 | Device | Type | RTFx | Time to first audio |
 |---|---|---|---|
-| Metal | F16 | 24 to 26 | 0.010 to 0.013 s |
-| Metal | Q8_0 | 26 to 27 | 0.011 to 0.013 s |
-| CPU | F16 | 18 to 19 | 0.024 to 0.048 s |
-| CPU | Q8_0 | 20 to 21 | 0.020 to 0.039 s |
+| Metal, M4 Max | F16 | 24 to 26 | 0.010 to 0.013 s |
+| Metal, M4 Max | Q8_0 | 26 to 27 | 0.011 to 0.013 s |
+| CPU, M4 Max | F16 | 18 to 19 | 0.024 to 0.048 s |
+| CPU, M4 Max | Q8_0 | 20 to 21 | 0.020 to 0.039 s |
+| Vulkan, RTX 5090 | F16 | 32 | 0.014 to 0.026 s |
+| Vulkan, RTX 5090 | Q8_0 | 32 | 0.015 to 0.026 s |
+| CPU, Core Ultra 9 285 | F16 | 8.3 to 8.7 | 0.058 to 0.108 s |
+| CPU, Core Ultra 9 285 | Q8_0 | 8.3 to 9.5 | 0.049 to 0.097 s |
 
 ## License
 
