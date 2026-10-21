@@ -45,7 +45,7 @@ from pins import CARDS, model
 ARCH = "pocket-tts"
 # Each layout this converter has written, with the first release of speech.cpp whose reader takes it; it writes the
 # last.
-RELEASES = {1: "0.8.11"}
+RELEASES = {1: "0.8.12"}
 LAYOUT = max(RELEASES)
 # The SPDX identifier of each license a model card names.
 LICENSES = {"cc-by-4.0": "CC-BY-4.0", "cc-by-nc-4.0": "CC-BY-NC-4.0"}

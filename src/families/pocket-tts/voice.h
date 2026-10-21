@@ -14,7 +14,7 @@ namespace pocket {
 constexpr const char * kVoiceArchitecture = "pocket-tts-voice";
 constexpr uint32_t kVoiceLayout = 1;
 /** The release whose reader first takes voice files of kVoiceLayout, which a voice file names as speech.requires. */
-constexpr const char * kVoiceLayoutRequires = "0.8.11";
+constexpr const char * kVoiceLayoutRequires = "0.8.12";
 
 /**
  * The layout of a voice file for the model file `model`: the latent of one recording, [latent_dim, frames], bound by its

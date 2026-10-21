@@ -38,5 +38,5 @@ The alternatives were turned down:
 
 ## Consequences
 
-A voice made with the English model speaks with the Japanese one and back. A voice file names 0.8.11 in
+A voice made with the English model speaks with the Japanese one and back. A voice file names 0.8.12 in
 `speech.requires`, the first release that reads its layout 1.

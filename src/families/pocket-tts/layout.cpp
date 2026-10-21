@@ -23,12 +23,12 @@ namespace {
  * families do. The norms, the biases, the layer scales, the latent's projections and statistics, the end-of-speech
  * head and the convolution of the waveform take F32.
  */
-const Storage kMatrix = quantized_storage({{GGML_TYPE_F32, "0.8.11"},
-                                           {GGML_TYPE_F16, "0.8.11"},
-                                           {GGML_TYPE_Q8_0, "0.8.11"},
-                                           {GGML_TYPE_Q6_K, "0.8.11"},
-                                           {GGML_TYPE_Q5_K, "0.8.11"},
-                                           {GGML_TYPE_Q4_K, "0.8.11"}});
+const Storage kMatrix = quantized_storage({{GGML_TYPE_F32, "0.8.12"},
+                                           {GGML_TYPE_F16, "0.8.12"},
+                                           {GGML_TYPE_Q8_0, "0.8.12"},
+                                           {GGML_TYPE_Q6_K, "0.8.12"},
+                                           {GGML_TYPE_Q5_K, "0.8.12"},
+                                           {GGML_TYPE_Q4_K, "0.8.12"}});
 const Storage kHalf = half_storage();
 const Storage kF32 = float32_storage();
 
